@@ -774,6 +774,10 @@ SPARKS.SphereCapZone.prototype.getLocation = function() {
   var i = this.minr - ((this.minr-this.maxr) *  Math.random() );
   v.multiplyScalar(i);
 
+  v.x += this.x;
+  v.y += this.y;
+  v.z += this.z;
+
   v.__markedForReleased = true;
 
   return v;
