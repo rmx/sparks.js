@@ -715,43 +715,38 @@ SPARKS.CubeZone.prototype.contains = function(position) {
  * @param innerRadius The inner radius of the disc. This defines the hole
  * in the center of the disc. If set to zero, there is no hole.
  */
-
-/*
-// BUGGY!!
 SPARKS.DiscZone = function(center, radiusNormal, outerRadius, innerRadius) {
-this.center = center;
-this.radiusNormal = radiusNormal;
-this.outerRadius = (outerRadius==undefined) ? 0 : outerRadius;
-this.innerRadius = (innerRadius==undefined) ? 0 : innerRadius;
+  this.center = center;
+  this.radiusNormal = radiusNormal;
+  this.outerRadius = (outerRadius==undefined) ? 0 : outerRadius;
+  this.innerRadius = (innerRadius==undefined) ? 0 : innerRadius;
 
 };
 
 SPARKS.DiscZone.prototype.getLocation = function() {
-var rand = Math.random();
-var _innerRadius = this.innerRadius;
-var _outerRadius = this.outerRadius;
-var center = this.center;
-var _normal = this.radiusNormal;
+  var rand = Math.random();
+  var _innerRadius = this.innerRadius;
+  var _outerRadius = this.outerRadius;
+  var _center = this.center;
+  var _normal = this.radiusNormal;
 
-_distToOrigin = _normal.dot( center );
+  //FIXME: generate true uniform distribution
+  var radius = _innerRadius + (1 - rand * rand) * (_outerRadius - _innerRadius);
+  var angle  = Math.random() * SPARKS.Utils.TWOPI;
+  var x      = radius * Math.cos(angle);
+  var y      = radius * Math.sin(angle);
+  var point  = new THREE.Vector3(x, y, 0);
 
-var radius = _innerRadius + (1 - rand * rand ) * ( _outerRadius - _innerRadius );
-var angle = Math.random() * SPARKS.Utils.TWOPI;
+  axis = SPARKS.Utils.getPerpendiculars(_normal);
 
-var _distToOrigin = _normal.dot( center );
-var axes = SPARKS.Utils.getPerpendiculars( _normal.clone() );
-var _planeAxis1 = axes[0];
-var _planeAxis2 = axes[1];
+  axis[0].multiplyScalar(point.x);
+  axis[1].multiplyScalar(point.y);
+  point.add(axis[0], axis[1]);
+  point.addSelf(_center);
 
-var p = _planeAxis1.clone();
-p.multiplyScalar( radius * Math.cos( angle ) );
-var p2 = _planeAxis2.clone();
-p2.multiplyScalar( radius * Math.sin( angle ) );
-p.addSelf( p2 );
-return _center.add( p );
-
+  return point;
 };
-*/
+
 
 SPARKS.SphereCapZone = function(x, y, z, minr, maxr, angle) {
   this.x = x;
@@ -893,14 +888,20 @@ SPARKS.Utils = {
   random: function() {
     return Math.random();
   },
+
   DEGREE_TO_RADIAN: Math.PI / 180,
   TWOPI: Math.PI * 2,
 
   getPerpendiculars: function(normal) {
-    var p1 = this.getPerpendicular( normal );
-    var p2 = normal.cross( p1 );
-    p2.normalize();
-    return [ p1, p2 ];
+    //FIXME: check if parallel
+    var random = new THREE.Vector3( 1, 0, 0 );
+    var axis1  = new THREE.Vector3( 0, 0, 0 );
+    var axis2  = new THREE.Vector3( 0, 0, 0 );
+    axis1.cross(normal, random);
+    axis2.cross(axis1, normal);
+    axis1.normalize();
+    axis2.normalize();
+    return [axis1, axis2];
   },
 
   getPerpendicular: function( v )
