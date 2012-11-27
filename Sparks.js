@@ -783,15 +783,17 @@ SPARKS.Velocity.prototype.initialize = function(emitter, particle) {
   }
 };
 
-SPARKS.Target = function(target, callback) {
-  this.target = target;
+
+SPARKS.Target = function(target, color, callback) {
+  this.target   = target;
   this.callback = callback;
+  this.color    = color;
 };
 
 SPARKS.Target.prototype.initialize = function(emitter, particle) {
 
   if (this.callback) {
-    particle.target = this.callback();
+    particle.target = this.callback(this.color);
   } else {
     particle.target = this.target;
   }
