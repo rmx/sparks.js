@@ -11,13 +11,11 @@
 
 var SPARKS = {};
 
-/********************************
+/*****************************************************************************
  * Emitter Class
  *
  *   Creates and Manages Particles
- *********************************/
-
-
+ ****************************************************************************/
 SPARKS.Engine = {
   // Combined Singleton Engine;
   _TIMESTEP: 15,
@@ -141,7 +139,8 @@ SPARKS.Emitter.prototype = {
 
   // Step gets called upon by the engine
   // but attempts to call update() on a regular basics
-  // This method is also described in http://gameclosure.com/2011/04/11/deterministic-delta-tee-in-js-games/
+  // This method is also described in
+  //    http://gameclosure.com/2011/04/11/deterministic-delta-tee-in-js-games/
   step: function(emitter) {
 
     var time = Date.now();
@@ -285,8 +284,6 @@ SPARKS.Emitter.prototype = {
     }
 
   }
-
-
 };
 
 
@@ -297,16 +294,14 @@ SPARKS.Emitter.prototype = {
  */
 SPARKS.EVENT_PARTICLE_CREATED = "created"
 SPARKS.EVENT_PARTICLE_UPDATED = "updated"
-SPARKS.EVENT_PARTICLE_DEAD = "dead";
-SPARKS.EVENT_LOOP_UPDATED = "loopUpdated";
-
+SPARKS.EVENT_PARTICLE_DEAD    = "dead";
+SPARKS.EVENT_LOOP_UPDATED     = "loopUpdated";
 
 
 /*
  * Steady Counter attempts to produces a particle rate steadily
  *
  */
-
 // Number of particles per seconds
 SPARKS.SteadyCounter = function(rate) {
   this.rate = rate;
@@ -322,7 +317,6 @@ SPARKS.SteadyCounter.prototype.updateEmitter = function(emitter, time) {
   var actualRelease = Math.floor(targetRelease);
 
   this.leftover = targetRelease - actualRelease;
-
   return actualRelease;
 };
 
@@ -331,10 +325,9 @@ SPARKS.SteadyCounter.prototype.updateEmitter = function(emitter, time) {
  * Shot Counter produces specified particles
  * on a single impluse or burst
  */
-
 SPARKS.ShotCounter = function(particles) {
   this.particles = particles;
-  this.used = false;
+  this.used      = false;
 };
 
 SPARKS.ShotCounter.prototype.updateEmitter = function(emitter, time) {
@@ -349,11 +342,11 @@ SPARKS.ShotCounter.prototype.updateEmitter = function(emitter, time) {
 };
 
 
-/********************************
+/*****************************************************************************
  * Particle Class
  *
  *   Represents a single particle
- *********************************/
+ ****************************************************************************/
 SPARKS.Particle = function() {
 
   /**
@@ -381,9 +374,8 @@ SPARKS.Particle = function() {
   /**
    * For 3D
    */
-
-  this.position = SPARKS.VectorPool.get().set(0,0,0); //new THREE.Vector3( 0, 0, 0 );
-  this.velocity = SPARKS.VectorPool.get().set(0,0,0); //new THREE.Vector3( 0, 0, 0 );
+  this.position     = SPARKS.VectorPool.get().set(0,0,0);
+  this.velocity     = SPARKS.VectorPool.get().set(0,0,0);
   this._oldvelocity = SPARKS.VectorPool.get().set(0,0,0);
   // rotation vec3
   // angVelocity vec3
@@ -392,12 +384,11 @@ SPARKS.Particle = function() {
 };
 
 
-/********************************
+/*****************************************************************************
  * Action Classes
  *
- *   An abstract class which have
- *   update function
- *********************************/
+ * An abstract class which have update function
+ ****************************************************************************/
 SPARKS.Action = function() {
   this._priority = 0;
 };
@@ -409,17 +400,15 @@ SPARKS.Age = function(easing) {
 
 SPARKS.Age.prototype.update = function (emitter, particle, time) {
   particle.age += time;
-  if( particle.age >= particle.lifetime )
-  {
+  if( particle.age >= particle.lifetime ) {
     particle.energy = 0;
     particle.isDead = true;
-  }
-  else
-  {
+  } else {
     var t = this._easing(particle.age / particle.lifetime);
     particle.energy = -1 * t + 1;
   }
 };
+
 
 /*
 // Mark particle as dead when particle's < 0
@@ -437,13 +426,12 @@ particle.isDead = true;
 
 
 SPARKS.Move = function() {
-
 };
 
 SPARKS.Move.prototype.update = function(emitter, particle, time) {
   // attempt verlet velocity updating.
-  var p = particle.position;
-  var v = particle.velocity;
+  var p   = particle.position;
+  var v   = particle.velocity;
   var old = particle._oldvelocity;
 
   if (this._velocityVerlet) {
@@ -459,10 +447,8 @@ SPARKS.Move.prototype.update = function(emitter, particle, time) {
   //  OldVel = Vel;
   // Vel = Vel + Accel * dt;
   // Pos = Pos + (vel + Vel + Accel * dt) * 0.5 * dt;
-
-
-
 };
+
 
 /* Marks particles found in specified zone dead */
 SPARKS.DeathZone = function(zone) {
@@ -474,8 +460,8 @@ SPARKS.DeathZone.prototype.update = function(emitter, particle, time) {
   if (this.zone.contains(particle.position)) {
     particle.isDead = true;
   }
-
 };
+
 
 /*
  * SPARKS.ActionZone applies an action when particle is found in zone
@@ -488,10 +474,10 @@ SPARKS.ActionZone = function(action, zone) {
 SPARKS.ActionZone.prototype.update = function(emitter, particle, time) {
 
   if (this.zone.contains(particle.position)) {
-    this.action.update( emitter, particle, time );
+    this.action.update(emitter, particle, time);
   }
-
 };
+
 
 /*
  * Accelerate action affects velocity in specified 3d direction
@@ -502,23 +488,19 @@ SPARKS.Accelerate = function(x,y,z) {
     this.acceleration = x;
     return;
   }
-
   this.acceleration = new THREE.Vector3(x,y,z);
-
 };
 
 SPARKS.Accelerate.prototype.update = function(emitter, particle, time) {
   var acc = this.acceleration;
-
   var v = particle.velocity;
-
   particle._oldvelocity.set(v.x, v.y, v.z);
 
   v.x += acc.x * time;
   v.y += acc.y * time;
   v.z += acc.z * time;
-
 };
+
 
 /*
  * Accelerate Factor accelerate based on a factor of particle's velocity.
@@ -528,42 +510,28 @@ SPARKS.AccelerateFactor = function(factor) {
 };
 
 SPARKS.AccelerateFactor.prototype.update = function(emitter, particle, time) {
-  var factor = this.factor;
-
-  var v = particle.velocity;
+  var v   = particle.velocity;
   var len = v.length();
-  var adjFactor;
-  if (len>0) {
-
-    adjFactor = factor * time / len;
-    adjFactor += 1;
-
+  if (len > 0) {
+    var adjFactor = this.factor * time / len + 1;
     v.multiplyScalar(adjFactor);
-
   }
-
 };
+
 
 /*
    AccelerateNormal
  * AccelerateVelocity affects velocity based on its velocity direction
  */
 SPARKS.AccelerateVelocity = function(factor) {
-
   this.factor = factor;
-
 };
 
 SPARKS.AccelerateVelocity.prototype.update = function(emitter, particle, time) {
-  var factor = this.factor;
-
   var v = particle.velocity;
-
-
-  v.z += - v.x * factor;
-  v.y += v.z * factor;
-  v.x +=  v.y * factor;
-
+  v.z += - v.x * this.factor;
+  v.y +=   v.z * this.factor;
+  v.x +=   v.y * this.factor;
 };
 
 
@@ -577,24 +545,22 @@ SPARKS.RandomDrift = function(x,y,z) {
   this.drift = new THREE.Vector3(x,y,z);
 }
 
-
 SPARKS.RandomDrift.prototype.update = function(emitter, particle, time) {
   var drift = this.drift;
+  var v     = particle.velocity;
 
-  var v = particle.velocity;
-
-  v.x += ( Math.random() - 0.5 ) * drift.x * time;
-  v.y += ( Math.random() - 0.5 ) * drift.y * time;
-  v.z += ( Math.random() - 0.5 ) * drift.z * time;
-
+  v.x += (SPARKS.Utils.random() - 0.5) * drift.x * time;
+  v.y += (SPARKS.Utils.random() - 0.5) * drift.y * time;
+  v.z += (SPARKS.Utils.random() - 0.5) * drift.z * time;
 };
 
-/********************************
+
+/*****************************************************************************
  * Zone Classes
  *
  *   An abstract classes which have
  *   getLocation() function
- *********************************/
+ ****************************************************************************/
 SPARKS.Zone = function() {
 };
 
@@ -616,6 +582,7 @@ SPARKS.PointZone.prototype.getLocation = function() {
   return this.pos;
 };
 
+
 SPARKS.LineZone = function(start, end) {
   this.start = start;
   this.end = end;
@@ -624,17 +591,16 @@ SPARKS.LineZone = function(start, end) {
 
 SPARKS.LineZone.prototype.getLocation = function() {
   var len = this._length.clone();
-
-  len.multiplyScalar( Math.random() );
-  return len.addSelf( this.start );
-
+  len.multiplyScalar(SPARKS.Utils.random());
+  return len.addSelf(this.start);
 };
+
 
 // Basically a RectangleZone
 SPARKS.ParallelogramZone = function(corner, side1, side2) {
   this.corner = corner;
-  this.side1 = side1;
-  this.side2 = side2;
+  this.side1  = side1;
+  this.side2  = side2;
 };
 
 SPARKS.ParallelogramZone.prototype.getLocation = function() {
@@ -642,9 +608,10 @@ SPARKS.ParallelogramZone.prototype.getLocation = function() {
   var d1 = this.side1.clone().multiplyScalar( Math.random() );
   var d2 = this.side2.clone().multiplyScalar( Math.random() );
   d1.addSelf(d2);
-  return d1.addSelf( this.corner );
+  return d1.addSelf(this.corner);
 
 };
+
 
 SPARKS.CubeZone = function(position, x, y, z) {
   this.position = position;
@@ -662,9 +629,7 @@ SPARKS.CubeZone.prototype.getLocation = function() {
   location.z += Math.random() * this.z;
 
   return location;
-
 };
-
 
 SPARKS.CubeZone.prototype.contains = function(position) {
 
@@ -701,9 +666,7 @@ SPARKS.CubeZone.prototype.contains = function(position) {
       }
 
   return false;
-
 };
-
 
 
 /**
@@ -779,22 +742,19 @@ SPARKS.SphereCapZone.prototype.getLocation = function() {
 };
 
 
-/********************************
+/*****************************************************************************
  * Initializer Classes
  *
- *   Classes which initializes
- *   particles. Implements initialize( emitter:Emitter, particle:Particle )
- *********************************/
-
+ * Classes which initializes particles. Implements
+ *     initialize(emitter:Emitter, particle:Particle)
+ ****************************************************************************/
 // Specifies random life between max and min
 SPARKS.Lifetime = function(min, max) {
   this._min = min;
-
   this._max = max ? max : min;
-
 };
 
-SPARKS.Lifetime.prototype.initialize = function( emitter/*Emitter*/, particle/*Particle*/ ) {
+SPARKS.Lifetime.prototype.initialize = function(emitter, particle) {
   particle.lifetime = this._min + SPARKS.Utils.random() * ( this._max - this._min );
 };
 
@@ -803,16 +763,17 @@ SPARKS.Position = function(zone) {
   this.zone = zone;
 };
 
-SPARKS.Position.prototype.initialize = function( emitter/*Emitter*/, particle/*Particle*/ ) {
+SPARKS.Position.prototype.initialize = function(emitter, particle) {
   var pos = this.zone.getLocation();
   particle.position.set(pos.x, pos.y, pos.z);
 };
+
 
 SPARKS.Velocity = function(zone) {
   this.zone = zone;
 };
 
-SPARKS.Velocity.prototype.initialize = function( emitter/*Emitter*/, particle/*Particle*/ ) {
+SPARKS.Velocity.prototype.initialize = function(emitter, particle) {
   var pos = this.zone.getLocation();
   particle.velocity.set(pos.x, pos.y, pos.z);
   if (pos.__markedForReleased) {
@@ -827,7 +788,7 @@ SPARKS.Target = function(target, callback) {
   this.callback = callback;
 };
 
-SPARKS.Target.prototype.initialize = function( emitter, particle ) {
+SPARKS.Target.prototype.initialize = function(emitter, particle) {
 
   if (this.callback) {
     particle.target = this.callback();
@@ -837,12 +798,12 @@ SPARKS.Target.prototype.initialize = function( emitter, particle ) {
 
 };
 
-/********************************
+
+/*****************************************************************************
  * VectorPool
  *
- *  Reuse much of Vectors if possible
- *********************************/
-
+ * Reuse vectors if possible
+ ****************************************************************************/
 SPARKS.VectorPool = {
   __pools: [],
 
@@ -853,7 +814,6 @@ SPARKS.VectorPool = {
     }
 
     return this._addToPool();
-
   },
 
   // Release a vector back into the pool
@@ -863,34 +823,28 @@ SPARKS.VectorPool = {
 
   // Create a bunch of vectors and add to the pool
   _addToPool: function() {
-    //console.log("creating some pools");
-
     for (var i=0, size = 100; i < size; i++) {
       this.__pools.push(new THREE.Vector3());
     }
 
     return new THREE.Vector3();
-
   }
-
-
-
 };
 
 
-/********************************
+/*****************************************************************************
  * Util Classes
  *
- *   Classes which initializes
- *   particles. Implements initialize( emitter:Emitter, particle:Particle )
- *********************************/
+ * Utility functions used in zones and actions.
+ ****************************************************************************/
 SPARKS.Utils = {
+
+  DEGREE_TO_RADIAN: Math.PI / 180,
+  TWOPI:            Math.PI * 2,
+
   random: function() {
     return Math.random();
   },
-
-  DEGREE_TO_RADIAN: Math.PI / 180,
-  TWOPI: Math.PI * 2,
 
   getPerpendiculars: function(normal) {
     //FIXME: check if parallel
@@ -902,19 +856,6 @@ SPARKS.Utils = {
     axis1.normalize();
     axis2.normalize();
     return [axis1, axis2];
-  },
-
-  getPerpendicular: function( v )
-  {
-    if( v.x == 0 )
-    {
-      return new THREE.Vector3D( 1, 0, 0 );
-    }
-    else
-    {
-      var temp = new THREE.Vector3( v.y, -v.x, 0 );
-      return temp.normalize();
-    }
   }
 
 };
