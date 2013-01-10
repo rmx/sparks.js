@@ -218,9 +218,7 @@ SPARKS.Emitter.prototype = {
         //particle =
         this._particles.splice( i, 1 );
         this.dispatchEvent("dead", particle);
-        SPARKS.VectorPool.release(particle.position); //
-        SPARKS.VectorPool.release(particle.velocity);
-
+        SPARKS.ParticlePool.release(particle)
       } else {
         this.dispatchEvent("updated", particle);
       }
@@ -231,15 +229,14 @@ SPARKS.Emitter.prototype = {
   },
 
   createParticle: function() {
-    var particle = new SPARKS.Particle();
-    // In future, use a Particle Factory
+    var particle = SPARKS.ParticlePool.get();
     var len = this._initializers.length, i;
 
     for ( i = 0; i < len; i++ ) {
       this._initializers[i].initialize( this, particle );
     }
 
-    this._particles.push( particle );
+    this._particles.push(particle);
 
     this.dispatchEvent("created", particle); // ParticleCreated
 
@@ -382,6 +379,22 @@ SPARKS.Particle = function() {
   // faceAxis vec3
 
 };
+
+
+SPARKS.Particle.prototype.reset = function() {
+
+  this.lifetime = 0;
+  this.age      = 0;
+  this.energy   = 1;
+  this.isDead   = false;
+  this.target   = null;
+
+  this.position.set(0, 0, 0)
+  this.velocity.set(0, 0, 0)
+  this._oldvelocity.set(0, 0, 0)
+
+  return this;
+}
 
 
 /*****************************************************************************
@@ -832,6 +845,30 @@ SPARKS.VectorPool = {
     return new THREE.Vector3();
   }
 };
+
+
+
+SPARKS.ParticlePool = {
+
+  __pool: [],
+  __maxPoolSize: 9999,
+
+  get: function() {
+    if (this.__pool.length > 0) {
+      return this.__pool.pop().reset();
+    } else {
+      return new SPARKS.Particle();
+    }
+  },
+
+  release: function(v) {
+    if (this.__pool.length < this.__maxPoolSize) {
+      this.__pool.push(v);
+    }
+  },
+
+};
+
 
 
 /*****************************************************************************
