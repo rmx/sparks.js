@@ -549,9 +549,9 @@ SPARKS.RandomDrift.prototype.update = function(emitter, particle, time) {
   var drift = this.drift;
   var v     = particle.velocity;
 
-  v.x += (SPARKS.Utils.random() - 0.5) * drift.x * time;
-  v.y += (SPARKS.Utils.random() - 0.5) * drift.y * time;
-  v.z += (SPARKS.Utils.random() - 0.5) * drift.z * time;
+  v.x += (Math.random() - 0.5) * drift.x * time;
+  v.y += (Math.random() - 0.5) * drift.y * time;
+  v.z += (Math.random() - 0.5) * drift.z * time;
 };
 
 
@@ -591,7 +591,7 @@ SPARKS.LineZone = function(start, end) {
 
 SPARKS.LineZone.prototype.getLocation = function() {
   var len = this._length.clone();
-  len.multiplyScalar(SPARKS.Utils.random());
+  len.multiplyScalar(Math.random());
   return len.addSelf(this.start);
 };
 
@@ -755,7 +755,7 @@ SPARKS.Lifetime = function(min, max) {
 };
 
 SPARKS.Lifetime.prototype.initialize = function(emitter, particle) {
-  particle.lifetime = this._min + SPARKS.Utils.random() * ( this._max - this._min );
+  particle.lifetime = this._min + Math.random() * ( this._max - this._min );
 };
 
 
@@ -843,10 +843,6 @@ SPARKS.Utils = {
 
   DEGREE_TO_RADIAN: Math.PI / 180,
   TWOPI:            Math.PI * 2,
-
-  random: function() {
-    return Math.random();
-  },
 
   getPerpendiculars: function(normal) {
     //FIXME: check if parallel
